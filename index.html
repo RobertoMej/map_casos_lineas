@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mapa de San Salvador</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Estilo de Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Mapa de Puntos en San Salvador</h2>
+<div id="map"></div>
+
+<!-- Script de Leaflet -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  // Inicializar el mapa centrado en San Salvador
+var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+});
+
+var carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap & CartoDB'
+});
+
+var map = L.map('map', {
+  center: [13.7031879, -89.1239906],
+  zoom: 13.25,
+  layers: [osm]  // capa base inicial
+});
+
+var baseMaps = {
+  "OpenStreetMap": osm,
+  "CartoDB Positron": carto
+};
+
+L.control.layers(baseMaps).addTo(map);
+
+
+  // Array de puntos (puedes agregar más)
+var puntos = [
+  { nombre: "Caso 1", lat: 13.687642, lng: -89.147379 },
+  { nombre: "Caso 2", lat: 13.703138, lng: -89.136641 },
+  { nombre: "Caso 3", lat: 13.699927, lng: -89.130235 },
+  { nombre: "Caso 4", lat: 13.696240, lng: -89.122357 },
+  { nombre: "Caso 5", lat: 13.705195, lng: -89.142081 },
+  { nombre: "Caso 6", lat: 13.699364, lng: -89.133676 },
+  { nombre: "Caso 7", lat: 13.699364, lng: -89.133676 },
+  { nombre: "Caso 8", lat: 13.702440, lng: -89.137886 },
+  { nombre: "Caso 9", lat: 13.703138, lng: -89.136641 },
+  { nombre: "Caso 10", lat: 13.696916, lng: -89.155708 },
+  { nombre: "Caso 11", lat: 13.700520, lng: -89.148126 },
+  { nombre: "Caso 12", lat: 13.700212, lng: -89.147850 },
+  { nombre: "Caso 13", lat: 13.712328, lng: -89.136834 },
+  { nombre: "Caso 14", lat: 13.704779, lng: -89.138824 },
+  { nombre: "Caso 15", lat: 13.701732, lng: -89.140529 },
+  { nombre: "Caso 16", lat: 13.698741, lng: -89.134741 },
+  { nombre: "Caso 17", lat: 13.700212, lng: -89.147850 },
+  { nombre: "Caso 18", lat: 13.710367, lng: -89.135697 },
+  { nombre: "Caso 19", lat: 13.735550, lng: -89.059640 },
+  { nombre: "Centro Escolar Dinamarca", lat: 13.702157, lng: -89.142151 }
+];
+
+  // Añadir marcadores al mapa
+var miIcono = L.icon({
+  iconUrl: 'https://img.icons8.com/?size=100&id=ulsukz1YV3nj&format=png&color=000000', // cambia esta ruta
+  iconSize: [30, 30],             // tamaño del icono
+  iconAnchor: [16, 32],           // el punto "inferior central" del icono
+  popupAnchor: [0, -32]           // dónde aparece el popup
+});
+
+puntos.forEach(function(punto) {
+  L.marker([punto.lat, punto.lng], { icon: miIcono }).addTo(map)
+    .bindPopup(`<strong>${punto.nombre}</strong>`);
+});
+
+// Agregar la capa GeoJSON al mapa
+fetch('lineas.geojson')
+  .then(res => res.json())
+  .then(data => {
+    L.geoJSON(data, {
+      style: { color: 'blue', weight: 1 }
+    }).addTo(map);
+  })
+  .catch(error => console.error('Error al cargar el archivo GeoJSON:', error));
+
+// Cargar y mostrar el archivo de polígonos
+fetch('zonas.geojson')
+  .then(response => response.json())
+  .then(data => {
+    const capaPoligonos = L.geoJSON(data, {
+      style: {
+        color: '#87CEEB',       // Borde
+        fillColor: '#87CEEB', // Relleno
+        fillOpacity: 0.5,
+        weight: 2
+      },
+      onEachFeature: function (feature, layer) {
+        if (feature.properties && feature.properties.nombre) {
+          layer.bindPopup("Zona: " + feature.properties.nombre);
+        }
+      }
+    }).addTo(map);
+  })
+  .catch(error => {
+    console.error('Error al cargar zonas.geojson:', error);
+  });
+
+
+</script>
+
+</body>
+</html>
